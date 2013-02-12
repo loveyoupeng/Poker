@@ -1,6 +1,6 @@
 package com.loveyoupeng.poker.model.entity.card
 
-abstract sealed class Ranking(private val value: Int) extends Ordered[Ranking] {
+abstract sealed class Ranking(val value: Int) extends Ordered[Ranking] {
   def compare(that: Ranking) = value - that.value;
 }
 case object Ace extends Ranking(14);
