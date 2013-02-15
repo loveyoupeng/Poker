@@ -25,5 +25,11 @@ object HandBuilder {
       ignoreB <- community.cards.drop(community.cards.indexOf(ignoreA) + 1)
     } yield Hand(community.cards.filter(card => card != ignoreA && card != ignoreB) ++ pocket.cards)
   }
-  def rankOf(hand: Hand): HandRanking = RoyalFlush
+  def rankOf(hand: Hand): HandRanking = {
+    for(classifier <- HandRanking.classifiers){
+      if(classifier.fit(hand))
+        return classifier.build(hand);
+    }
+    throw new Exception
+  }
 }

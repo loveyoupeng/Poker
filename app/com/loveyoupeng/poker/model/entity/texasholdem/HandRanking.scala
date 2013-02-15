@@ -32,6 +32,9 @@ trait HandClassification {
 
 object HandRanking {
   implicit def card2RankingInt(card: Card): Int = card.ranking.value
+  def classifiers(): List[HandClassification] = {
+    List(RoyalFlush, StraightFlush, FourOfAKind, FullHouse, Flush, Straight, ThreeOfAKind, TwoPair, OnePair, HighCard)
+  }
 }
 
 object RoyalFlush extends HandRanking(10) with HandClassification {
