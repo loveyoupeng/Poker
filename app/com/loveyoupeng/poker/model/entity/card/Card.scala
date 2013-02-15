@@ -34,5 +34,4 @@ object Card {
       ranking <- rankings
     } yield Card(ranking, suit))
   }
-
 }
