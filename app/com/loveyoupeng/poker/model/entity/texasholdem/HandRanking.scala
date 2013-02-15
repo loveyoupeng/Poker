@@ -6,6 +6,9 @@ package com.loveyoupeng.poker.model.entity.texasholdem
 import com.loveyoupeng.poker.model.entity.card.Nine
 import com.loveyoupeng.poker.model.entity.card.Ranking
 import com.loveyoupeng.poker.model.entity.card.Card
+import com.loveyoupeng.poker.model.entity.texasholdem.HandRanking._
+import com.loveyoupeng.poker.model.entity.card.Ace
+import com.loveyoupeng.poker.model.entity.card.Five
 
 /**
  * @author loveyoupeng
@@ -21,22 +24,45 @@ sealed abstract class HandRanking(private val typeRanking: Int) extends Ordered[
   def score: Int
 }
 
+trait HandClassification {
+  def fit(hand: Hand): Boolean
+  def build(hand: Hand): HandRanking
+}
+
 object HandRanking {
   implicit def card2RankingInt(card: Card): Int = card.ranking.value
 }
 
-import com.loveyoupeng.poker.model.entity.texasholdem.HandRanking._
-
-object RoyalFlush extends HandRanking(10) {
+object RoyalFlush extends HandRanking(10) with HandClassification {
   def score = Int.MaxValue
+
+  def fit(hand: Hand): Boolean = hand.cards.mapConserve(_.suit).distinct.size == 1 && hand.cards.filter(_ > 9).size == 5
+  def build(hand: Hand): HandRanking = RoyalFlush
 }
 
 case class StraightFlush(private val top: Card) extends HandRanking(9) {
-  def score = top
+  def score = if (top.ranking != Ace) top else Five.value
 }
+
+object StraightFlush extends HandClassification {
+  def fit(hand: Hand): Boolean = hand.cards.mapConserve(_.suit).distinct.size == 1 && (hand.cards.filter(_ < 14).size == 5 && hand.cards.last - hand.cards.head == 4 || hand.cards.last == Ace && hand.cards.reverse.tail.filter(_ < 6).size == 4)
+  def build(hand: Hand): HandRanking = StraightFlush(hand.cards.last);
+}
+
 case class FourOfAKind(private val four: Card, private val kicker: Card) extends HandRanking(8) {
   def score = four * 100 + kicker
 }
+
+object FourOfAKind extends HandClassification {
+  def fit(hand: Hand): Boolean = hand.cards.filter(_ == hand.cards.head).size == 4 || hand.cards.filter(_ == hand.cards.last).size == 4
+  def build(hand: Hand): HandRanking = {
+    if (hand.cards.filter(_ == hand.cards.head).size == 4)
+      FourOfAKind(hand.cards.head, hand.cards.last)
+    else
+      FourOfAKind(hand.cards.last, hand.cards.head)
+  }
+}
+
 case class FullHouse(private val three: Card, private val pair: Card) extends HandRanking(7) {
   def score = three * 100 + pair
 }
@@ -68,15 +94,8 @@ case class HighCard(private val cards: List[Card]) extends HandRanking(1) {
 }
 
 
-//  }
-//}
-//
-//object FourOfAKind extends HandType(8) {
-//  def suite(hand: Hand) = {
-//    hand.cards.map(_.ranking)
-//      .foldLeft[Map[Ranking, Int]](Map[Ranking, Int]())((map: Map[Ranking, Int], ranking: Ranking) => { if (map.contains(ranking)) map updated (ranking, map(ranking) + 1) else map + (ranking -> 1); map })
-//      .values.filter(_ == 4).size == 1
-//  }
-//}
+
+
+
 
  
