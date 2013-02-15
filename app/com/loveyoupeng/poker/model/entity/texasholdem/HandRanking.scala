@@ -9,6 +9,7 @@ import com.loveyoupeng.poker.model.entity.card.Card
 import com.loveyoupeng.poker.model.entity.texasholdem.HandRanking._
 import com.loveyoupeng.poker.model.entity.card.Ace
 import com.loveyoupeng.poker.model.entity.card.Five
+import scala.language.implicitConversions
 
 /**
  * @author loveyoupeng
@@ -45,7 +46,7 @@ case class StraightFlush(private val top: Card) extends HandRanking(9) {
 }
 
 object StraightFlush extends HandClassification {
-  def fit(hand: Hand): Boolean = hand.cards.mapConserve(_.suit).distinct.size == 1 && (hand.cards.filter(_ < 14).size == 5 && hand.cards.last - hand.cards.head == 4 || hand.cards.last == Ace && hand.cards.reverse.tail.filter(_ < 6).size == 4)
+  def fit(hand: Hand): Boolean = hand.cards.mapConserve(_.suit).distinct.size == 1 && (hand.cards.filter(_ < 14).size == 5 && hand.cards.last - hand.cards.head == 4 || hand.cards.last.ranking == Ace && hand.cards.reverse.tail.filter(_ < 6).size == 4)
   def build(hand: Hand): HandRanking = StraightFlush(hand.cards.last);
 }
 
